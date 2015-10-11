@@ -30,4 +30,4 @@ cc: #cleancode
 	goimports -w .
 
 dev: install
-	cat resources/input-data/wp.pl_1.bin | go-telnet www.wp.pl 80
+	cat resources/input-data/wp.pl_1.bin | go-telnet wp.pl 80
