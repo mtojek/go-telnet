@@ -8,7 +8,7 @@ Read bytes from stdin and pass them to the remote host. The application works si
 
 ### Problem Definition
 
-Old telnet does not work in that manner and it requires a script based on _expect_ command. Trying an intuitive solution would end like that:
+Old telnet does not work in that manner and it requires a script based on _expect_ command. Trying an intuitive solution would end up with that:
 
 ~~~
 $ cat resources/input-data/wp.pl_1.bin | telnet wp.pl 80
