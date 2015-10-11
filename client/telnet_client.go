@@ -40,7 +40,7 @@ func createTCPAddr(options Options) string {
 func resolveTCPAddr(addr string) *net.TCPAddr {
 	resolved, error := net.ResolveTCPAddr("tcp", addr)
 	if nil != error {
-		log.Fatalf("Error occured while resolving TCP address \"%v\": %v", addr, error)
+		log.Fatalf("Error occured while resolving TCP address \"%v\": %v\n", addr, error)
 	}
 
 	return resolved
@@ -50,47 +50,65 @@ func resolveTCPAddr(addr string) *net.TCPAddr {
 func (t *TelnetClient) ProcessData(inputData io.Reader) {
 	connection, error := net.DialTCP("tcp", nil, t.destination)
 	if nil != error {
-		log.Fatalf("Error occured while connecting to address \"%v\": %v", t.destination.String(), error)
+		log.Fatalf("Error occured while connecting to address \"%v\": %v\n", t.destination.String(), error)
 	}
 
 	defer connection.Close()
-	t.writeInputData(connection, inputData)
-	t.printServerResponse(connection)
-}
 
-func (t *TelnetClient) writeInputData(connection *net.TCPConn, dataReader io.Reader) {
-	reader := bufio.NewReader(dataReader)
-	b, error := reader.ReadByte()
+	requestDataChannel := make(chan []byte)
+	doneChannel := make(chan bool)
+	responseDataChannel := make(chan []byte)
 
-	for nil == error {
-		connection.Write([]byte{b})
-		b, error = reader.ReadByte()
-	}
+	go t.readInputData(inputData, requestDataChannel, doneChannel)
+	go t.readServerData(connection, responseDataChannel)
 
-	t.assertEOF(error)
-}
-
-func (t *TelnetClient) printServerResponse(connection *net.TCPConn) {
-	var someRead bool
-	receivedChannel := make(chan []byte, 1)
-
-	go t.readData(connection, receivedChannel)
+	var afterEOFResponseTicker = new(time.Ticker)
+	var afterEOFMode bool
+	var somethingRead bool
 
 	for {
 		select {
-		case data := <-receivedChannel:
-			someRead = true
-			fmt.Printf("%v", string(data))
-		case <-time.After(t.responseTimeout):
-			if !someRead {
-				log.Println("Nothing read. Timeout?")
+		case request := <-requestDataChannel:
+			if _, error := connection.Write(request); nil != error {
+				log.Fatalf("Error occured while writing to TCP socket: %v\n", error)
+			}
+		case <-doneChannel:
+			afterEOFMode = true
+			afterEOFResponseTicker = time.NewTicker(t.responseTimeout)
+		case response := <-responseDataChannel:
+			fmt.Printf("%v", string(response))
+			somethingRead = true
+
+			if afterEOFMode {
+				afterEOFResponseTicker.Stop()
+				afterEOFResponseTicker = time.NewTicker(t.responseTimeout)
+			}
+		case <-afterEOFResponseTicker.C:
+			if !somethingRead {
+				log.Println("Nothing read. Maybe connection timeout.")
 			}
 			return
 		}
 	}
 }
 
-func (t *TelnetClient) readData(connection *net.TCPConn, received chan<- []byte) {
+func (t *TelnetClient) readInputData(inputData io.Reader, toSent chan<- []byte, doneChannel chan<- bool) {
+	buffer := make([]byte, defaultBufferSize)
+	var error error
+	var n int
+
+	reader := bufio.NewReader(inputData)
+
+	for nil == error {
+		n, error = reader.Read(buffer)
+		toSent <- buffer[:n]
+	}
+
+	t.assertEOF(error)
+	doneChannel <- true
+}
+
+func (t *TelnetClient) readServerData(connection *net.TCPConn, received chan<- []byte) {
 	buffer := make([]byte, defaultBufferSize)
 	var error error
 	var n int
@@ -105,6 +123,6 @@ func (t *TelnetClient) readData(connection *net.TCPConn, received chan<- []byte)
 
 func (t *TelnetClient) assertEOF(error error) {
 	if "EOF" != error.Error() {
-		log.Fatalf("Error occured while writing to TCP socket: %v", error)
+		log.Fatalf("Error occured while operating on TCP socket: %v\n", error)
 	}
 }
