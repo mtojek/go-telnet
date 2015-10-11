@@ -4,7 +4,7 @@
 
 Status: **Work in progress**
 
-Read bytes from stdin and pass them to the remote host. The application works similarly to the well known telnet application, but it lets you read an input from standard input and wait for response.
+Read bytes from stdin and pass them to the remote host. The application works similarly to the well known telnet application, but it lets you read bytes from standard input and wait for response.
 
 ### Problem Description 
 
@@ -18,7 +18,7 @@ Escape character is '^]'.
 Connection closed by foreign host.
 ~~~
 
-The same execution of _go-telnet_ ends with a received server response.
+The same execution of _go-telnet_ ends with a received server response:
 ~~~
 cat resources/input-data/wp.pl_1.bin | go-telnet www.wp.pl 80
 ~~~
