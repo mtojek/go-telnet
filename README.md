@@ -21,6 +21,14 @@ Connection closed by foreign host.
 The same execution of _go-telnet_ ends with a received server response:
 ~~~
 $ cat resources/input-data/wp.pl_1.bin | go-telnet wp.pl 80
+HTTP/1.1 200 OK
+Server: aris
+Expires: Sun, 11 Oct 2015 20:34:22 GMT
+Last-Modified: Sun, 11 Oct 2015 20:34:22 GMT
+Pragma: no-cache
+Cache-Control: no-cache
+Content-type: text/html; charset=UTF-8
+Set-Cookie: ...
 ~~~
 
 ### Usage ###

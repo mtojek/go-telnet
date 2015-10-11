@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/mtojek/go-telnet/client"
 	"github.com/mtojek/go-telnet/commandline"
 )
 
@@ -14,5 +15,6 @@ func newGoTelnet() *goTelnet {
 
 func (g *goTelnet) run() {
 	commandLine := commandline.Read()
-	fmt.Println(commandLine)
+	telnetClient := client.NewTelnetClient(commandLine)
+	telnetClient.ProcessData(os.Stdin)
 }

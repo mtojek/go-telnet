@@ -15,8 +15,8 @@ func Read() *CommandLine {
 	kingpin.Parse()
 
 	return &CommandLine{
-		Host:    *host,
-		Port:    *port,
-		Timeout: *timeout,
+		host:    *host,
+		port:    *port,
+		timeout: *timeout,
 	}
 }
