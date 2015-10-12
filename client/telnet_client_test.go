@@ -55,12 +55,17 @@ func TestProcessDataFromBufferedString(t *testing.T) {
 	})
 	localServer.StartHTTP()
 
+	var response = new(bytes.Buffer)
+
 	// when
-	sut.ProcessData(buffer, os.Stdout)
+	sut.ProcessData(buffer, response)
 
 	// then
 	localServer.Stop()
 	http.DefaultServeMux = http.NewServeMux()
+
+	assert := assert.New(t)
+	assert.Regexp("HTTP/1.1 200 OK\r\nDate: Mon, .+ GMT\r\nContent-Length: 11\r\nContent-Type: text/plain; charset=utf-8\r\n\r\na_response\n", response.String(), "Expected different response.")
 }
 
 func TestProcessDataFromFile(t *testing.T) {
@@ -75,20 +80,24 @@ func TestProcessDataFromFile(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-
 	defer fi.Close()
-
 	buffer := bufio.NewReader(fi)
+
 	localServer := localserver.NewLocalServer(fmt.Sprintf("%v:%d", ip.String(), port), "http")
 	http.HandleFunc("/second", func(response http.ResponseWriter, request *http.Request) {
 		response.Write([]byte("b_response\n"))
 	})
 	localServer.StartHTTP()
 
+	var response = new(bytes.Buffer)
+
 	// when
-	sut.ProcessData(buffer, os.Stdout)
+	sut.ProcessData(buffer, response)
 
 	// then
 	localServer.Stop()
 	http.DefaultServeMux = http.NewServeMux()
+
+	assert := assert.New(t)
+	assert.Regexp("HTTP/1.1 200 OK\r\nDate: Mon, .+ GMT\r\nContent-Length: 11\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nb_response\n", response.String(), "Expected different response.")
 }
