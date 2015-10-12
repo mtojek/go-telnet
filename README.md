@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mtojek/go-telnet.svg?branch=master)](https://travis-ci.org/mtojek/go-telnet)
 
-Status: **Work in progress**
+Status: **Done**
 
 Read bytes from stdin and pass them to the remote host. The application works similarly to the well known telnet application, but it lets you read bytes from standard input and wait for response.
 
