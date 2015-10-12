@@ -14,7 +14,12 @@ func newGoTelnet() *goTelnet {
 }
 
 func (g *goTelnet) run() {
+	telnetClient := g.createTelnetClient()
+	telnetClient.ProcessData(os.Stdin)
+}
+
+func (g *goTelnet) createTelnetClient() *client.TelnetClient {
 	commandLine := commandline.Read()
 	telnetClient := client.NewTelnetClient(commandLine)
-	telnetClient.ProcessData(os.Stdin)
+	return telnetClient
 }

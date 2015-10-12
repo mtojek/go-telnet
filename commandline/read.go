@@ -1,6 +1,10 @@
 package commandline
 
-import "gopkg.in/alecthomas/kingpin.v2"
+import (
+	"os"
+
+	"gopkg.in/alecthomas/kingpin.v2"
+)
 
 // Read method returns valid options read from command line args.
 func Read() *CommandLine {
@@ -18,5 +22,13 @@ func Read() *CommandLine {
 		host:    *host,
 		port:    *port,
 		timeout: *timeout,
+	}
+}
+
+// SetCommandLineArgs method changes earlier set arguments (use only in debug).
+func SetCommandLineArgs(customArguments ...string) {
+	os.Args = os.Args[0:1] // leave only app path
+	for _, customArgument := range customArguments {
+		os.Args = append(os.Args, customArgument)
 	}
 }

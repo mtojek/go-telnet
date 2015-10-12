@@ -2,7 +2,6 @@ package commandline
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"time"
 
@@ -13,7 +12,7 @@ func TestReadRequiredArguments(t *testing.T) {
 	// given
 	host := "aHost"
 	port := uint64(92832932)
-	setCommandLineArgs(host, fmt.Sprintf("%d", port))
+	SetCommandLineArgs(host, fmt.Sprintf("%d", port))
 
 	// when
 	commandLine := Read()
@@ -27,7 +26,7 @@ func TestReadRequiredArguments(t *testing.T) {
 func TestReadOptionalFlags(t *testing.T) {
 	// given
 	timeout := time.Duration(5 * time.Second)
-	setCommandLineArgs("-t", fmt.Sprintf("%v", timeout), "host", "123")
+	SetCommandLineArgs("-t", fmt.Sprintf("%v", timeout), "host", "123")
 
 	// when
 	commandLine := Read()
@@ -35,11 +34,4 @@ func TestReadOptionalFlags(t *testing.T) {
 	// then
 	assert := assert.New(t)
 	assert.Equal(timeout, commandLine.Timeout(), "Timeout read from command line is different than set earlier.")
-}
-
-func setCommandLineArgs(customArguments ...string) {
-	os.Args = os.Args[0:1] // leave only app path
-	for _, customArgument := range customArguments {
-		os.Args = append(os.Args, customArgument)
-	}
 }
